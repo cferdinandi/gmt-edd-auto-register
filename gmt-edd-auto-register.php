@@ -1,17 +1,19 @@
 <?php
-/*
-Plugin Name: GMT EDD Auto Register
-Plugin URI: https://gomakethings.com
-Description: Automatically creates a WP user account at checkout, based on customer's email address.
-Version: 1.4.0
-Author: Andrew Munro, Pippin Williamson, and Chris Klosowski
-Contributors: sumobi, mordauk, cklosows, mindctrl
-Author URI: https://easydigitaldownloads.com/
-Text Domain: edd-auto-register
-Domain Path: languages
-License: GPL-2.0+
-License URI: http://www.opensource.org/licenses/gpl-license.php
-*/
+
+/**
+ * Plugin Name: GMT EDD Auto Register
+ * Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
+ * GitHub Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
+ * Description: Automatically creates a WP user account at checkout, based on customer's email address.
+ * Version: 1.4.0
+ * Author: Andrew Munro, Pippin Williamson, and Chris Klosowski
+ * Contributors: sumobi, mordauk, cklosows, mindctrl
+ * Author URI: https://easydigitaldownloads.com/
+ * Text Domain: edd-auto-register
+ * Domain Path: languages
+ * License: GPL-2.0+
+ * License URI: http://www.opensource.org/licenses/gpl-license.php
+ */
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
