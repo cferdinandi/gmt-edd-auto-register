@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * GitHub Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * Description: Automatically creates a WP user account at checkout, based on customer's email address.
- * Version: 1.4.0
+ * Version: 1.4.1
  * Author: Andrew Munro, Pippin Williamson, and Chris Klosowski
  * Contributors: sumobi, mordauk, cklosows, mindctrl
  * Author URI: https://easydigitaldownloads.com/
@@ -299,7 +299,7 @@ if ( ! class_exists( 'EDD_Auto_Register' ) ) {
 		 */
 		public function maybe_insert_user( $payment_id, $payment_data ) {
 
-			if ( !$this->gmt_is_recurring_in_cart($payment_id) ) return;
+			if ( empty($this->gmt_is_recurring_in_cart($payment_id)) ) return;
 
 			// It's possible that a extension (like recurring) has already auto-inserted a user, let's verify
 			if ( ! is_user_logged_in() ) {
