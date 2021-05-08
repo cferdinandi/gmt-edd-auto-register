@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * GitHub Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * Description: Automatically creates a WP user account at checkout, based on customer's email address.
- * Version: 1.4.1
+ * Version: 1.5.0
  * Author: Andrew Munro, Pippin Williamson, and Chris Klosowski
  * Contributors: sumobi, mordauk, cklosows, mindctrl
  * Author URI: https://easydigitaldownloads.com/
@@ -321,6 +321,7 @@ if ( ! class_exists( 'EDD_Auto_Register' ) ) {
 
 				$user_id = $this->create_user( $payment_data, $payment_id );
 
+
 			} else {
 
 				if( function_exists( 'did_action' ) && ! did_action( 'edd_create_payment' ) ) {
@@ -382,7 +383,23 @@ if ( ! class_exists( 'EDD_Auto_Register' ) ) {
 					add_user_to_blog( get_current_blog_id(), $user->ID, get_option( 'default_role' ) );
 				}
 
-				return false;
+				if (user_can( $user->ID, 'edit_posts' )) {
+					return false;
+				}
+
+				$temp_pw = wp_generate_password(48, false);
+				wp_set_password( $temp_pw, $user->ID );
+				$login = wp_signon(array(
+					'user_login' => $user->user_login,
+					'user_password' => $temp_pw
+				));
+
+				if (is_wp_error($login)) {
+					return false;
+				}
+
+				return $user->ID;
+
 			}
 
 			$user_name = sanitize_user( $payment_data['user_info']['email'] );
@@ -509,3 +526,13 @@ add_action( 'plugins_loaded', 'edd_auto_register', apply_filters( 'edd_auto_regi
  * Remove user reg email
  */
 remove_action( 'edd_send_verification_email', 'edd_process_user_verification_request' );
+
+// Disable user password reset notification to admin
+if ( ! function_exists( 'wp_password_change_notification' ) ) {
+	function wp_password_change_notification( $user ) {
+		return;
+	}
+}
+
+// Disable password change notification to the user
+add_filter( 'send_email_change_email', '__return_false' );
