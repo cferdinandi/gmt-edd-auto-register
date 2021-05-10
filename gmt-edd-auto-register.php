@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * GitHub Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * Description: Automatically creates a WP user account at checkout, based on customer's email address.
- * Version: 1.5.1
+ * Version: 1.5.2
  * Author: Andrew Munro, Pippin Williamson, and Chris Klosowski
  * Contributors: sumobi, mordauk, cklosows, mindctrl
  * Author URI: https://easydigitaldownloads.com/
@@ -378,28 +378,7 @@ if ( ! class_exists( 'EDD_Auto_Register' ) ) {
 
 			// User account already exists
 			if ( $user ) {
-
-				if( is_multisite() ) {
-					add_user_to_blog( get_current_blog_id(), $user->ID, get_option( 'default_role' ) );
-				}
-
-				if (user_can( $user->ID, 'edit_posts' )) {
-					return false;
-				}
-
-				$temp_pw = wp_generate_password(48, false);
-				wp_set_password( $temp_pw, $user->ID );
-				$login = wp_signon(array(
-					'user_login' => $user->user_login,
-					'user_password' => $temp_pw
-				));
-
-				if (is_wp_error($login)) {
-					return false;
-				}
-
-				return $user->ID;
-
+				return false;
 			}
 
 			$user_name = sanitize_user( $payment_data['user_info']['email'] );
@@ -537,3 +516,43 @@ if ( ! function_exists( 'wp_password_change_notification' ) ) {
 // Disable password change notification to the user
 add_filter( 'send_email_change_email', '__return_false' );
 add_filter( 'send_password_change_email', '__return_false' );
+
+
+// Make sure the user is logged in if they are using an already existing user email.
+function login_existing_users () {
+
+	if (is_user_logged_in()) return;
+
+	$purchase_data = edd_get_purchase_session();
+	$user = get_user_by( 'email', $purchase_data['user_email'] );
+	if (empty($user)) return;
+	if (user_can( $user->ID, 'edit_posts' )) return;
+
+	$temp_pw = wp_generate_password(48, false);
+	wp_set_password( $temp_pw, $user->ID );
+	$login = wp_signon(array(
+		'user_login' => $user->user_login,
+		'user_password' => $temp_pw,
+		'remember' => true,
+	));
+
+	if (!is_wp_error($login)) {
+		wp_set_current_user($user->ID);
+	}
+
+}
+add_action( 'edd_recurring_process_checkout', 'login_existing_users' );
+
+
+// Remove require login for Stripe payments
+function gmtedda_remove_require_login () {
+	global $edd_recurring_stripe;
+	remove_action( 'edds_pre_process_purchase_form', array( $edd_recurring_stripe, 'require_login_for_existing_users' ) );
+}
+add_action( 'init', 'gmtedda_remove_require_login' );
+
+// Remove admin bar
+function remove_admin_bar() {
+	show_admin_bar(false);
+}
+add_action('after_setup_theme', 'remove_admin_bar');
