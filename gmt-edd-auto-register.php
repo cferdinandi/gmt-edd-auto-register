@@ -555,7 +555,25 @@ add_action('after_setup_theme', 'remove_admin_bar');
 /**
  * Remove user reg email
  */
-function gmtedda_remove_verification_emails() {
-	remove_action( 'edd_send_verification_email', 'edd_process_user_verification_request' );
+function gmtedda_skip_verification ($user_id = null) {
+
+	if( is_null( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
+
+	// No need to run a DB lookup on an empty user id
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	delete_user_meta( $user_id, '_edd_pending_verification', true );
+
+    return false;
+
 }
-add_action('plugins_loaded','gmtedda_remove_verification_emails');
+add_filter( 'edd_user_pending_verification', 'edd_send_verification_email', 10, 3 );
+
+//Remove original use created emails
+remove_action( 'edd_send_verification_email', 'edd_process_user_verification_request' );
+remove_action( 'register_new_user', 'wp_send_new_user_notifications' );
+remove_action( 'edit_user_created_user', 'wp_send_new_user_notifications', 10, 2 );
