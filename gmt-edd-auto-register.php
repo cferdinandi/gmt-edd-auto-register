@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * GitHub Plugin URI: https://github.com/cferdinandi/gmt-edd-auto-register
  * Description: Automatically creates a WP user account at checkout, based on customer's email address.
- * Version: 1.5.2
+ * Version: 1.5.3
  * Author: Andrew Munro, Pippin Williamson, and Chris Klosowski
  * Contributors: sumobi, mordauk, cklosows, mindctrl
  * Author URI: https://easydigitaldownloads.com/
@@ -501,11 +501,6 @@ function edd_auto_register() {
 add_action( 'plugins_loaded', 'edd_auto_register', apply_filters( 'edd_auto_register_action_priority', 10 ) );
 
 
-/**
- * Remove user reg email
- */
-remove_action( 'edd_send_verification_email', 'edd_process_user_verification_request' );
-
 // Disable user password reset notification to admin
 if ( ! function_exists( 'wp_password_change_notification' ) ) {
 	function wp_password_change_notification( $user ) {
@@ -556,3 +551,11 @@ function remove_admin_bar() {
 	show_admin_bar(false);
 }
 add_action('after_setup_theme', 'remove_admin_bar');
+
+/**
+ * Remove user reg email
+ */
+function gmtedda_remove_verification_emails() {
+	remove_action( 'edd_send_verification_email', 'edd_process_user_verification_request' );
+}
+add_action('plugins_loaded','gmtedda_remove_verification_emails');
